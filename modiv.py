@@ -1,6 +1,10 @@
 labels = {}
 acc = int(1)
 linenum = 0
+code = """:cat
+SET ain
+AOUT acc
+JUMP cat"""
 
 def nmod(n):
     global acc
@@ -22,8 +26,9 @@ def evaluate(expression):
 
     # Replace '^' with '**'
     expression = expression.replace('^', '**')
+    expression = expression.replace('/', '//')
 
-    allowed = set("0123456789abcdefghijklmnopqrstuvwxyz+-*/(), ")
+    allowed = set("0123456789+-*/() nmod")
     if set(expression.lower()).issubset(allowed):
         # Provide nmod and rely on global acc for 'acc'
         x = eval(expression, {"nmod": nmod})
@@ -60,10 +65,9 @@ def AOut(x):
 def DOut(x):
     print(x, end='')
 
-def runline(line):
-    global linenum
-    if line.startswith(':'):
-        label(line.strip(':'), linenum)
-    elif line.startswith('SET'):
-        SET(evaluate(line[2:]))
-    
+def labeling():
+    global labels, code
+    for line in code.split('\n'):
+        if line.startswith(':'):
+            label(line.strip(": "))
+
