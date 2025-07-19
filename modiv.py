@@ -1,10 +1,18 @@
+import argparse
+
+parser = argparse.ArgumentParser(description="A tool for creating Python-Lua polyglots")
+parser.add_argument("-f", "--file", type=str, required=True, help="Specify the code file")
+parser.add_argument("-o", "--output", type=str, required=False, help="Specify the output file name")
+
+args = parser.parse_args()
+
+with open(args.file, "r") as f:
+    code = f.read()
+
 labels = {}
 acc = int(1)
 linenum = 0
-code = """:cat
-SET ain
-AOUT acc
-JUMP cat"""
+
 
 def nmod(n):
     global acc
@@ -16,21 +24,20 @@ def nmod(n):
     return r
 
 def evaluate(expression):
-    # Replace din inputs
+    global acc
     while 'din' in expression:
         expression = expression.replace('din', str(int(input())), 1)
 
-    # Replace ain inputs
     while 'ain' in expression:
         expression = expression.replace('ain', str(ord(input()[0])), 1)
 
-    # Replace '^' with '**'
+    expression = expression.replace('acc', str(acc))
     expression = expression.replace('^', '**')
     expression = expression.replace('/', '//')
 
-    allowed = set("0123456789+-*/() nmod")
+    allowed = set("0123456789+-*/() nmod\n")
+
     if set(expression.lower()).issubset(allowed):
-        # Provide nmod and rely on global acc for 'acc'
         x = eval(expression, {"nmod": nmod})
         if isinstance(x, int) and x >= 0:
             return x
@@ -38,6 +45,7 @@ def evaluate(expression):
             raise ValueError("Negative or non-integer result not allowed.")
     else:
         raise ValueError("Unsafe characters in expression.")
+
 
 
     
@@ -55,8 +63,7 @@ def Jump(name):
 
 def CJump(name, x):
     global acc, linenum, labels
-    if acc % x == 0:
-        SET(acc // x)
+    if x != 0:
         Jump(name)
 
 def AOut(x):
@@ -67,7 +74,37 @@ def DOut(x):
 
 def labeling():
     global labels, code
+    y = 0
     for line in code.split('\n'):
         if line.startswith(':'):
-            label(line.strip(": "))
+            label(line.strip(": "),y)
+            y+=1
 
+def run(line):
+    global acc, labels, linenum
+
+    if line.startswith('SET'):
+        SET(evaluate(line.strip('SET')))
+    elif line.startswith('JUMP'):
+        Jump(line.strip('JUMP '))
+    elif line.startswith('CJUMP'):
+        line = line.strip('CJUMP ')
+        smth = line.split(' ', 1)
+        CJump(smth[0],evaluate(smth[1]))
+    elif line.startswith('AOUT'):
+        AOut(evaluate(line.strip('AOUT')))
+    elif line.startswith('DOUT'):
+        DOut(evaluate(line.strip('DOUT')))
+    else:
+        pass
+
+
+def execute():
+    global code, linenum
+    labeling()
+    code = code.split('\n')
+    while linenum < len(code):
+        run(code[linenum])
+        linenum += 1
+
+execute()
