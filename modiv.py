@@ -1,6 +1,6 @@
 import argparse
 
-parser = argparse.ArgumentParser(description="A tool for creating Python-Lua polyglots")
+parser = argparse.ArgumentParser(description="Modiv interpreter")
 parser.add_argument("-f", "--file", type=str, required=True, help="Specify the code file")
 parser.add_argument("-o", "--output", type=str, required=False, help="Specify the output file name")
 
@@ -82,7 +82,6 @@ def labeling():
 
 def run(line):
     global acc, labels, linenum
-
     if line.startswith('SET'):
         SET(evaluate(line.strip('SET')))
     elif line.startswith('JUMP'):
