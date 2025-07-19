@@ -2,8 +2,6 @@ import argparse
 
 parser = argparse.ArgumentParser(description="Modiv interpreter")
 parser.add_argument("-f", "--file", type=str, required=True, help="Specify the code file")
-parser.add_argument("-o", "--output", type=str, required=False, help="Specify the output file name")
-
 args = parser.parse_args()
 
 with open(args.file, "r") as f:
@@ -51,7 +49,7 @@ def evaluate(expression):
     
 def label(name, number):
     global labels
-    labels[name] = number
+    labels[name.strip()] = number
 
 def SET(x):
     global acc
